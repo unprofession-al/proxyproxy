@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
@@ -15,7 +16,7 @@ import (
 type Server struct {
 	listener string
 	handler  http.Handler
-	srv      http.Server
+	srv      *http.Server
 }
 
 func NewServer(listener string) Server {
@@ -32,7 +33,7 @@ func NewServer(listener string) Server {
 }
 
 func (s Server) Run() {
-	s.srv = http.Server{
+	s.srv = &http.Server{
 		Addr:    s.listener,
 		Handler: s.handler,
 	}
@@ -44,9 +45,9 @@ func (s Server) Run() {
 	}()
 }
 
-func (s Server) Stop() error {
-	fmt.Printf("%#v", s.srv)
-	err := s.srv.Shutdown(context.TODO())
+func (s *Server) Stop() error {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := s.srv.Shutdown(ctx)
 	return err
 }
 

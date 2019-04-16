@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -31,30 +32,36 @@ func NewConfig(path string) (*Config, error) {
 		return c, errOut
 	}
 
+	for name, ppc := range c.ProxyProxyConfigs {
+		_, ipnet, err := net.ParseCIDR(ppc.InNet)
+		if err != nil {
+			errOut := fmt.Errorf("'in_net' (%s) of proxy_proxy_config %s could not be parsed as CIDR: %s\n", ppc.InNet, name, err)
+			return c, errOut
+		}
+
+		c.ProxyProxyConfigs[name].inNet = ipnet
+	}
+
 	return c, nil
 }
 
 type ProxyProxyConfig struct {
 	MITM        bool   `yaml:"mitm"`
 	InNet       string `yaml:"in_net"`
+	inNet       *net.IPNet
 	RemoteProxy string `yaml:"remote_proxy"`
 }
 
-type ProxyProxyConfigs map[string]ProxyProxyConfig
+type ProxyProxyConfigs map[string]*ProxyProxyConfig
 
-/*
-func (configs ProxyProxyConfigs) FindMatch(ip net.IPAddr) (string, ProxyProxyConfig) {
+func (configs ProxyProxyConfigs) FindMatch(ips []net.IP) (string, *ProxyProxyConfig) {
 	for name, config := range configs {
-		if config.InNet.Contains(ip) {
-			return name, config
+		for _, ip := range ips {
+			if config.inNet.Contains(ip) {
+				return name, config
+			}
 		}
 	}
 
-	defaultConfig, ok := configs["default"]
-	if ok {
-		return "default", defaultConfig
-	}
-
-	return "none", ProxyProxyConfig{}
+	return "none", &ProxyProxyConfig{}
 }
-*/

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"log"
 	"net"
@@ -10,7 +8,6 @@ import (
 	"os/signal"
 	"sync"
 
-	"github.com/elazarl/goproxy"
 	"github.com/spf13/pflag"
 )
 
@@ -38,45 +35,62 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	pp := &ProxyProxy{
-		Verbose: app.config.Verbose,
-		MITM:    false,
+	relevantInterfaces := []string{"eth0", "wlan0"}
+	ips, err := getRelevantIPs(relevantInterfaces)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	pp.Start(app.config.ProxyAddress)
+	name, ppc := app.config.ProxyProxyConfigs.FindMatch(ips)
+	log.Printf("Using profile '%s'", name)
+	pp := ProxyProxy{
+		Verbose: app.config.Verbose,
+		MITM:    ppc.MITM,
+		Proxy:   ppc.RemoteProxy,
+	}
+
+	out := pp.Start(app.config.ProxyAddress)
+	log.Println(out)
+	log.Printf("Started proxy with profile '%s'", name)
 
 	server := NewServer(app.config.AdminAddress)
 	server.Run()
 
-	l, _ := ListenNetlink()
+	go func() {
+		l, _ := ListenNetlink()
 
-	for {
-		msgs, err := l.ReadMsgs()
-		if err != nil {
-			fmt.Println("Could not read netlink: %s", err)
-		}
+		for {
+			msgs, err := l.ReadMsgs()
+			if err != nil {
+				log.Printf("Could not read netlink: %s\n", err.Error())
+			}
 
-		for _, m := range msgs {
-			if IsNewAddr(&m) || IsDelAddr(&m) {
-				fmt.Println("change")
-				addrs, err := net.InterfaceAddrs()
-				if err != nil {
-					os.Stderr.WriteString("Oops: " + err.Error() + "\n")
-					os.Exit(1)
-				}
-
-				for _, a := range addrs {
-					if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-						if ipnet.IP.To4() != nil {
-							os.Stdout.WriteString(ipnet.IP.String() + "\n")
-						}
+			for _, m := range msgs {
+				if IsNewAddr(&m) || IsDelAddr(&m) {
+					log.Printf("Network configuration changed.\n")
+					ips, err := getRelevantIPs(relevantInterfaces)
+					if err != nil {
+						log.Fatal(err)
 					}
+
+					name, ppc := app.config.ProxyProxyConfigs.FindMatch(ips)
+					log.Printf("Using profile '%s'", name)
+					err = pp.Stop()
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					pp = ProxyProxy{
+						Verbose: app.config.Verbose,
+						MITM:    ppc.MITM,
+						Proxy:   ppc.RemoteProxy,
+					}
+					out := pp.Start(app.config.ProxyAddress)
+					log.Println(out)
 				}
 			}
 		}
-	}
-
+	}()
 	log.Println("Press Ctrl+C to end")
 	waitForCtrlC()
 
@@ -84,20 +98,35 @@ func main() {
 	server.Stop()
 }
 
-func setCA(caCert, caKey string) error {
-	goproxyCa, err := tls.LoadX509KeyPair(caCert, caKey)
+func mainLoop(c *Config, pp *ProxyProxy, s *Server) {
+	//func mainLoop() {
+}
+
+func getRelevantIPs(interfaces []string) ([]net.IP, error) {
+	var ips []net.IP
+	ifaces, err := net.Interfaces()
 	if err != nil {
-		return err
+		return ips, fmt.Errorf("Could not read interfaces: %s\n", err.Error())
 	}
-	if goproxyCa.Leaf, err = x509.ParseCertificate(goproxyCa.Certificate[0]); err != nil {
-		return err
+	for _, i := range ifaces {
+		for _, r := range interfaces {
+			if r == i.Name {
+				addrs, err := i.Addrs()
+				if err != nil {
+					return ips, fmt.Errorf("Could not read adresses of interface %s: %s\n", i.Name, err.Error())
+				}
+				for _, addr := range addrs {
+					switch v := addr.(type) {
+					case *net.IPNet:
+						ips = append(ips, v.IP)
+					case *net.IPAddr:
+						ips = append(ips, v.IP)
+					}
+				}
+			}
+		}
 	}
-	goproxy.GoproxyCa = goproxyCa
-	goproxy.OkConnect = &goproxy.ConnectAction{Action: goproxy.ConnectAccept, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	goproxy.MitmConnect = &goproxy.ConnectAction{Action: goproxy.ConnectMitm, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	goproxy.HTTPMitmConnect = &goproxy.ConnectAction{Action: goproxy.ConnectHTTPMitm, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	goproxy.RejectConnect = &goproxy.ConnectAction{Action: goproxy.ConnectReject, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	return nil
+	return ips, nil
 }
 
 func waitForCtrlC() {

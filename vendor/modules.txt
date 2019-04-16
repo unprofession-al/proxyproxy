@@ -1,0 +1,10 @@
+# github.com/elazarl/goproxy v0.0.0-20190410145444-c548f45dcf1d
+github.com/elazarl/goproxy
+# github.com/gorilla/mux v1.7.1
+github.com/gorilla/mux
+# github.com/justinas/alice v0.0.0-20171023064455-03f45bd4b7da
+github.com/justinas/alice
+# github.com/spf13/pflag v1.0.3
+github.com/spf13/pflag
+# gopkg.in/yaml.v2 v2.2.2
+gopkg.in/yaml.v2

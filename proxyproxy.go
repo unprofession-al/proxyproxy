@@ -16,10 +16,10 @@ type ProxyProxy struct {
 	MITM    bool
 	Proxy   string
 	Verbose bool
-	srv     http.Server
+	srv     *http.Server
 }
 
-func (pp ProxyProxy) Start(addr string) string {
+func (pp *ProxyProxy) Start(addr string) string {
 	var out string
 	proxy := goproxy.NewProxyHttpServer()
 
@@ -39,7 +39,7 @@ func (pp ProxyProxy) Start(addr string) string {
 
 	proxy.Verbose = pp.Verbose
 
-	pp.srv = http.Server{
+	pp.srv = &http.Server{
 		Addr:    addr,
 		Handler: proxy,
 	}
@@ -53,7 +53,7 @@ func (pp ProxyProxy) Start(addr string) string {
 	return out
 }
 
-func (pp ProxyProxy) Stop() error {
+func (pp *ProxyProxy) Stop() error {
 	srv := pp.srv
 	err := srv.Shutdown(context.Background())
 	return err

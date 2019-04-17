@@ -32,7 +32,7 @@ func NewServer(listener string) Server {
 	return s
 }
 
-func (s Server) Run() {
+func (s *Server) Run() {
 	s.srv = &http.Server{
 		Addr:    s.listener,
 		Handler: s.handler,

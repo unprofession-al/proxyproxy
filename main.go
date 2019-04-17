@@ -35,11 +35,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	relevantInterfaces := []string{"eth0", "wlan0"}
-	ips, err := getRelevantIPs(relevantInterfaces)
+	ips, err := getRelevantIPs(app.config.Interfaces)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("IPs detected %s.\n", ips)
 
 	name, ppc := app.config.ProxyProxyConfigs.FindMatch(ips)
 	log.Printf("Using profile '%s'", name)
@@ -68,11 +68,11 @@ func main() {
 			for _, m := range msgs {
 				if IsNewAddr(&m) || IsDelAddr(&m) {
 					log.Printf("Network configuration changed.\n")
-					ips, err := getRelevantIPs(relevantInterfaces)
+					ips, err := getRelevantIPs(app.config.Interfaces)
 					if err != nil {
 						log.Fatal(err)
 					}
-
+					log.Printf("IPs detected %s.\n", ips)
 					name, ppc := app.config.ProxyProxyConfigs.FindMatch(ips)
 					log.Printf("Using profile '%s'", name)
 					err = pp.Stop()
@@ -96,10 +96,6 @@ func main() {
 
 	pp.Stop()
 	server.Stop()
-}
-
-func mainLoop(c *Config, pp *ProxyProxy, s *Server) {
-	//func mainLoop() {
 }
 
 func getRelevantIPs(interfaces []string) ([]net.IP, error) {

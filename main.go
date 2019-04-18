@@ -19,7 +19,7 @@ type App struct {
 }
 
 func init() {
-	pflag.StringVarP(&app.configPath, "config", "c", "./config.yaml", "configuration file path")
+	pflag.StringVarP(&app.configPath, "config", "c", "/etc/proxyproxy/config.yaml", "configuration file path")
 }
 
 func main() {
@@ -31,9 +31,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = setCA(app.config.MITMCert, app.config.MITMKey)
-	if err != nil {
-		log.Fatal(err)
+	if app.config.MITMKey != "" && app.config.MITMCert != "" {
+		log.Printf("Setting up MITM CA\n")
+		err = setCA(app.config.MITMCert, app.config.MITMKey)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	ips, err := getRelevantIPs(app.config.Interfaces)
 	if err != nil {

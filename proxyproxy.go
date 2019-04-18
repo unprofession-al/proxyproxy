@@ -27,6 +27,7 @@ func (pp *ProxyProxy) Start(addr string) string {
 		proxy.Tr.Proxy = func(req *http.Request) (*url.URL, error) {
 			return url.Parse(pp.Proxy)
 		}
+		proxy.ConnectDial = proxy.NewConnectDialToProxy(pp.Proxy)
 		out = fmt.Sprintf("%sUsing remote proxy %s | ", out, pp.Proxy)
 	} else {
 		out = fmt.Sprintf("%sUsing no remote proxy | ", out)

@@ -47,16 +47,16 @@ func main() {
 	name, ppc := app.config.ProxyProxyConfigs.FindMatch(ips)
 	log.Printf("Using profile '%s'", name)
 	pp := ProxyProxy{
-		Verbose: app.config.Verbose,
-		MITM:    ppc.MITM,
-		Proxy:   ppc.RemoteProxy,
+		Verbose:     app.config.Verbose,
+		MITM:        ppc.MITM,
+		RemoteProxy: ppc.RemoteProxy,
 	}
 
 	out := pp.Start(app.config.ProxyAddress)
 	log.Println(out)
 	log.Printf("Started proxy with profile '%s'", name)
 
-	server := NewServer(app.config.AdminAddress)
+	server := NewServer(app.config.AdminAddress, &app, &pp)
 	server.Run()
 
 	go func() {
@@ -84,9 +84,9 @@ func main() {
 					}
 
 					pp = ProxyProxy{
-						Verbose: app.config.Verbose,
-						MITM:    ppc.MITM,
-						Proxy:   ppc.RemoteProxy,
+						Verbose:     app.config.Verbose,
+						MITM:        ppc.MITM,
+						RemoteProxy: ppc.RemoteProxy,
 					}
 					out := pp.Start(app.config.ProxyAddress)
 					log.Println(out)

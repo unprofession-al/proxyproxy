@@ -13,22 +13,22 @@ import (
 )
 
 type ProxyProxy struct {
-	MITM    bool
-	Proxy   string
-	Verbose bool
-	srv     *http.Server
+	MITM        bool         `yaml:"mitm" json:"mitm"`
+	RemoteProxy string       `yaml:"remote_proxy" json:"remote_proxy"`
+	Verbose     bool         `yaml:"verbose" json:"verbose"`
+	srv         *http.Server `yaml:"srv" json:"srv"`
 }
 
 func (pp *ProxyProxy) Start(addr string) string {
 	var out string
 	proxy := goproxy.NewProxyHttpServer()
 
-	if pp.Proxy != "" {
+	if pp.RemoteProxy != "" {
 		proxy.Tr.Proxy = func(req *http.Request) (*url.URL, error) {
-			return url.Parse(pp.Proxy)
+			return url.Parse(pp.RemoteProxy)
 		}
-		proxy.ConnectDial = proxy.NewConnectDialToProxy(pp.Proxy)
-		out = fmt.Sprintf("%sUsing remote proxy %s | ", out, pp.Proxy)
+		proxy.ConnectDial = proxy.NewConnectDialToProxy(pp.RemoteProxy)
+		out = fmt.Sprintf("%sUsing remote proxy %s | ", out, pp.RemoteProxy)
 	} else {
 		out = fmt.Sprintf("%sUsing no remote proxy | ", out)
 	}

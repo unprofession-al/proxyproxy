@@ -15,18 +15,24 @@ import (
 
 type Server struct {
 	listener string
-	handler  http.Handler
-	srv      *http.Server
+	app      *App
+	pp       *ProxyProxy
+
+	handler http.Handler
+	srv     *http.Server
 }
 
-func NewServer(listener string) Server {
+func NewServer(listener string, app *App, pp *ProxyProxy) Server {
 	s := Server{
 		listener: listener,
+		app:      app,
+		pp:       pp,
 	}
 
 	r := mux.NewRouter().StrictSlash(true)
 
 	r.HandleFunc("/config", s.ConfigHandler).Methods("GET")
+	r.HandleFunc("/current", s.CurrentSettingsHandler).Methods("GET")
 
 	s.handler = alice.New().Then(r)
 	return s
@@ -52,7 +58,11 @@ func (s *Server) Stop() error {
 }
 
 func (s Server) ConfigHandler(res http.ResponseWriter, req *http.Request) {
-	s.respond(res, req, http.StatusOK, app.config)
+	s.respond(res, req, http.StatusOK, s.app.config)
+}
+
+func (s Server) CurrentSettingsHandler(res http.ResponseWriter, req *http.Request) {
+	s.respond(res, req, http.StatusOK, s.pp)
 }
 
 func (s Server) respond(res http.ResponseWriter, req *http.Request, code int, data interface{}) {

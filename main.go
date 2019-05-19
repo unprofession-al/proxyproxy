@@ -31,13 +31,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if app.config.MITMKey != "" && app.config.MITMCert != "" {
-		log.Printf("Setting up MITM CA\n")
-		err = setCA(app.config.MITMCert, app.config.MITMKey)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 	ips, err := getRelevantIPs(app.config.Interfaces)
 	if err != nil {
 		log.Fatal(err)

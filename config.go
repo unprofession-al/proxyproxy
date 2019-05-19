@@ -11,8 +11,6 @@ import (
 type Config struct {
 	Verbose           bool              `yaml:"verbose" json:"verbose"`
 	Interfaces        []string          `yaml:"interfaces" json:"interfaces"`
-	MITMCert          string            `yaml:"mitm_cert" json:"mitm_cert"`
-	MITMKey           string            `yaml:"mitm_key" json:"mitm_key"`
 	ProxyAddress      string            `yaml:"proxy_address" json:"proxy_address"`
 	AdminAddress      string            `yaml:"admin_address" json:"admin_address"`
 	ProxyProxyConfigs ProxyProxyConfigs `yaml:"proxy_proxy_configs" json:"proxy_proxy_configs"`
@@ -47,11 +45,11 @@ func NewConfig(path string) (*Config, error) {
 }
 
 type ProxyProxyConfig struct {
-	MITM        bool       `yaml:"mitm" json:"mitm"`
-	RemoteProxy string     `yaml:"remote_proxy" json:"remote_proxy"`
-	Verbose     bool       `json:"verbose" yaml:"verbose"`
-	InNet       string     `yaml:"in_net" json:"in_net"`
-	inNet       *net.IPNet `json:"in_net" yaml:"in_net"`
+	RemoteProxy string `yaml:"remote_proxy" json:"remote_proxy"`
+	Verbose     bool   `json:"verbose" yaml:"verbose"`
+	InNet       string `yaml:"in_net" json:"in_net"`
+
+	inNet *net.IPNet `json:"-" yaml:"-"`
 }
 
 type ProxyProxyConfigs map[string]*ProxyProxyConfig

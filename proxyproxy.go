@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,14 +28,9 @@ func (pp *ProxyProxy) Start(addr string) string {
 			return url.Parse(pp.config.RemoteProxy)
 		}
 		proxy.ConnectDial = proxy.NewConnectDialToProxy(pp.config.RemoteProxy)
-		out = fmt.Sprintf("%sUsing remote proxy %s | ", out, pp.config.RemoteProxy)
+		out = fmt.Sprintf("%sUsing remote proxy %s... ", out, pp.config.RemoteProxy)
 	} else {
-		out = fmt.Sprintf("%sUsing no remote proxy | ", out)
-	}
-
-	if pp.config.MITM {
-		proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
-		out = fmt.Sprintf("%sMITM on | ", out)
+		out = fmt.Sprintf("%sUsing no remote proxy...", out)
 	}
 
 	proxy.Verbose = pp.config.Verbose
@@ -60,20 +53,4 @@ func (pp *ProxyProxy) Stop() error {
 	srv := pp.srv
 	err := srv.Shutdown(context.Background())
 	return err
-}
-
-func setCA(caCert, caKey string) error {
-	goproxyCa, err := tls.LoadX509KeyPair(caCert, caKey)
-	if err != nil {
-		return err
-	}
-	if goproxyCa.Leaf, err = x509.ParseCertificate(goproxyCa.Certificate[0]); err != nil {
-		return err
-	}
-	goproxy.GoproxyCa = goproxyCa
-	goproxy.OkConnect = &goproxy.ConnectAction{Action: goproxy.ConnectAccept, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	goproxy.MitmConnect = &goproxy.ConnectAction{Action: goproxy.ConnectMitm, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	goproxy.HTTPMitmConnect = &goproxy.ConnectAction{Action: goproxy.ConnectHTTPMitm, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	goproxy.RejectConnect = &goproxy.ConnectAction{Action: goproxy.ConnectReject, TLSConfig: goproxy.TLSConfigFromCA(&goproxyCa)}
-	return nil
 }

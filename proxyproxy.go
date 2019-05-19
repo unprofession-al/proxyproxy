@@ -13,32 +13,34 @@ import (
 )
 
 type ProxyProxy struct {
-	MITM        bool         `yaml:"mitm" json:"mitm"`
-	RemoteProxy string       `yaml:"remote_proxy" json:"remote_proxy"`
-	Verbose     bool         `yaml:"verbose" json:"verbose"`
-	srv         *http.Server `yaml:"srv" json:"srv"`
+	config *ProxyProxyConfig
+	srv    *http.Server
+}
+
+func NewProxyProxy(c *ProxyProxyConfig) ProxyProxy {
+	return ProxyProxy{config: c}
 }
 
 func (pp *ProxyProxy) Start(addr string) string {
 	var out string
 	proxy := goproxy.NewProxyHttpServer()
 
-	if pp.RemoteProxy != "" {
+	if pp.config.RemoteProxy != "" {
 		proxy.Tr.Proxy = func(req *http.Request) (*url.URL, error) {
-			return url.Parse(pp.RemoteProxy)
+			return url.Parse(pp.config.RemoteProxy)
 		}
-		proxy.ConnectDial = proxy.NewConnectDialToProxy(pp.RemoteProxy)
-		out = fmt.Sprintf("%sUsing remote proxy %s | ", out, pp.RemoteProxy)
+		proxy.ConnectDial = proxy.NewConnectDialToProxy(pp.config.RemoteProxy)
+		out = fmt.Sprintf("%sUsing remote proxy %s | ", out, pp.config.RemoteProxy)
 	} else {
 		out = fmt.Sprintf("%sUsing no remote proxy | ", out)
 	}
 
-	if pp.MITM {
+	if pp.config.MITM {
 		proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
 		out = fmt.Sprintf("%sMITM on | ", out)
 	}
 
-	proxy.Verbose = pp.Verbose
+	proxy.Verbose = pp.config.Verbose
 
 	pp.srv = &http.Server{
 		Addr:    addr,

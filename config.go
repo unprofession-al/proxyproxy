@@ -47,10 +47,11 @@ func NewConfig(path string) (*Config, error) {
 }
 
 type ProxyProxyConfig struct {
-	MITM        bool   `yaml:"mitm" json:"mitm"`
-	RemoteProxy string `yaml:"remote_proxy" json:"remote_proxy"`
-	InNet       string `yaml:"in_net" json:"in_net"`
-	inNet       *net.IPNet
+	MITM        bool       `yaml:"mitm" json:"mitm"`
+	RemoteProxy string     `yaml:"remote_proxy" json:"remote_proxy"`
+	Verbose     bool       `json:"verbose" yaml:"verbose"`
+	InNet       string     `yaml:"in_net" json:"in_net"`
+	inNet       *net.IPNet `json:"in_net" yaml:"in_net"`
 }
 
 type ProxyProxyConfigs map[string]*ProxyProxyConfig

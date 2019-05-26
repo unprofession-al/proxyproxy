@@ -5,9 +5,9 @@ in handling HTTP proxies which are often used in corperate IT infrasturctures. R
 to these proxy adresses are scattered all over your system, for example in Ubuntu you have:
 
 - `apt` package manager has its `/etc/apt/apt.conf`.
-- for some terrible reason the is a (setting hidden in `dconf`)[https://askubuntu.com/questions/1133286/set-ubuntu-desktop-network-proxy-settings-programmatically-on-18-04].
+- for some terrible reason the is a [setting hidden in `dconf`](https://askubuntu.com/questions/1133286/set-ubuntu-desktop-network-proxy-settings-programmatically-on-18-04).
 - a lot (but not all) of shell utilities use the `http(s)_proxy` environment variables. 
-- Docker needs some (config)[https://docs.docker.com/network/proxy/] to work behind a proxy.
+- Docker needs some [config](https://docs.docker.com/network/proxy/) to work behind a proxy.
 - Some browsers such as `firefox` are required to be configured.
 - etc.
 

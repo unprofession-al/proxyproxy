@@ -1,6 +1,6 @@
 # `proxyproxy`
 
-## What would I need such a thing?
+## Why would I need such a thing?
 
 Operating systems (or at least some common Linux distributions) are rather terrible
 in handling HTTP proxies which are often used in corperate IT infrasturctures. References

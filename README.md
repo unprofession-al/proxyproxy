@@ -1,4 +1,3 @@
-=======
 ![proxyproxy](./logo.svg "proxyproxy")
 
 ## Why would I need such a thing?

@@ -1,0 +1,59 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+before:
+  hooks:
+    # you may remove this if you don't use vgo
+    - go mod download
+    # you may remove this if you don't need go generate
+    - go generate ./...
+builds:
+- env:
+  - CGO_ENABLED=0
+  goos:
+    - linux
+  goarch:
+    - 386
+    - amd64
+    - arm
+    - arm64
+archives:
+- replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+  format_overrides:
+  - goos: windows
+    format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+snapcrafts:
+  -
+    name_template: '{{ .ProjectName }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    license: MIT
+    summary: A proxy that handles those corporate proxies for you
+    description: |
+      Operating systems (or at least some common Linux distributions) are rather
+      terrible in handling HTTP proxies which are often used in corperate IT
+      infrasturctures. References to these proxy adresses are scattered all over
+      your system. If you need to do this configuration once that is annoying
+      but manageable. But if you have to change these settigs everyonce in a while
+      because for example you need to use your notebook in a network without
+      proxy things get quite unhandy. `proxyproxy` solves that.
+    apps:
+      proxyproxy:
+        daemon: simple
+        plugs: [network]
+    grade: beta
+    confinement: classic
+    publish: true
+

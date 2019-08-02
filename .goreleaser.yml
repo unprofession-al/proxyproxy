@@ -53,7 +53,7 @@ snapcrafts:
       proxyproxy:
         daemon: simple
         plugs: [network]
-    grade: beta
+    grade: devel
     confinement: strict
     publish: true
 

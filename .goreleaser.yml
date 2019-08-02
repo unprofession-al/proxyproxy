@@ -54,6 +54,6 @@ snapcrafts:
         daemon: simple
         plugs: [network]
     grade: beta
-    confinement: classic
+    confinement: strict
     publish: true
 

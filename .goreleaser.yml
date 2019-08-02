@@ -52,8 +52,11 @@ snapcrafts:
     apps:
       proxyproxy:
         daemon: simple
-        plugs: [network]
-    grade: devel
-    confinement: strict
+        plugs:
+        - "network"
+        - "network-bind"
+        args: -c /var/snap/proxyproxy/common/config.yaml
+    grade: stable
+    confinement: classic
     publish: true
 

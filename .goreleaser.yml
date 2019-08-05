@@ -55,8 +55,10 @@ snapcrafts:
         plugs:
         - "network"
         - "network-bind"
+        - "network-observe"
+        - "hardware-observe"
         args: -c /var/snap/proxyproxy/common/config.yaml
     grade: stable
-    confinement: classic
+    confinement: strict
     publish: true
 

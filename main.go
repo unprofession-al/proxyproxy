@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 
 	"github.com/spf13/pflag"
@@ -94,7 +95,7 @@ func getRelevantIPs(interfaces []string) ([]net.IP, error) {
 	}
 	for _, i := range ifaces {
 		for _, r := range interfaces {
-			if r == i.Name {
+			if strings.Contains(i.Name, r) {
 				addrs, err := i.Addrs()
 				if err != nil {
 					return ips, fmt.Errorf("Could not read adresses of interface %s: %s\n", i.Name, err.Error())

@@ -62,7 +62,7 @@ func (s Server) ConfigHandler(res http.ResponseWriter, req *http.Request) {
 }
 
 func (s Server) CurrentSettingsHandler(res http.ResponseWriter, req *http.Request) {
-	s.respond(res, req, http.StatusOK, s.pp)
+	s.respond(res, req, http.StatusOK, s.pp.config)
 }
 
 func (s Server) respond(res http.ResponseWriter, req *http.Request, code int, data interface{}) {

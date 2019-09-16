@@ -3,7 +3,7 @@
 ## Why would I need such a thing?
 
 Operating systems (or at least some common Linux distributions) are rather terrible
-in handling HTTP proxies which are often used in cooperate IT infrastructures. References
+in handling HTTP proxies which are often used in corperate IT infrastructures. References
 to these proxy addresses are scattered all over your system, for example in Ubuntu you have:
 
 - `apt` package manager has its `/etc/apt/apt.conf`.
